@@ -1,32 +1,32 @@
 package com.test.weatherapi.ui
 
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
+import com.test.weatherapi.R
+import com.test.weatherapi.base.BaseFragment
 import com.test.weatherapi.data.remote.ApiResponse
-import com.test.weatherapi.databinding.ActivityMainBinding
+import com.test.weatherapi.databinding.FragmentWeatherBinding
 import com.test.weatherapi.utils.safeCollection
+import com.test.weatherapi.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class WeatherFragment : BaseFragment(R.layout.fragment_weather) {
 
-    private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
-/*
-    private val viewModel by activityViewModels<MainViewModel>()
-    private val viewModel: MainViewModel by viewModels(
-        ownerProducer = { requireParentFragment() }
-    )
- */
+    /**
+     *   other ways to create viewModel:
+     *   - viewModel by activityViewModels<WeatherViewModel>()
+     *   - viewModel by viewModels<WeatherViewModel>(ownerProducer = { requireParentFragment() })
+     *
+     */
+    private val viewModel by viewModels<WeatherViewModel>()
+    private val binding by viewBinding(FragmentWeatherBinding::bind)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.button.setOnClickListener {
             viewModel.getData()
@@ -48,4 +48,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 }
