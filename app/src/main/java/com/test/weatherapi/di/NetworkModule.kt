@@ -1,7 +1,7 @@
 package com.test.weatherapi.di
 
 import android.content.Context
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.test.weatherapi.BuildConfig
 import com.test.weatherapi.data.remote.ServiceApi
 import dagger.Module
@@ -9,12 +9,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -29,6 +31,11 @@ object NetworkModule {
     private const val WRITE_TIMEOUT_IN_SECONDS = 60
     private const val CACHE_SIZE_BYTES = 10 * 1024 * 1024L // 10 MB
     private const val KEY = "6e7bcade5f0a4a18aeb65644212112"
+
+    private val json = Json{
+        isLenient = true
+        ignoreUnknownKeys = true
+    }
 
     /**
      * provides an Interceptor object to enable logging http request/response,
@@ -89,14 +96,14 @@ object NetworkModule {
         return clientBuilder.build()
     }
 
+    @ExperimentalSerializationApi
     @Provides
     @Singleton
     fun provideRetrofit(httpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(httpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 

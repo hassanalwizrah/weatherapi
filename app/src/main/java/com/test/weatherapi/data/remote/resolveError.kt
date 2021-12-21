@@ -1,18 +1,15 @@
 package com.test.weatherapi.data.remote
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonSyntaxException
+import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
-import java.lang.Exception
 import java.net.UnknownHostException
 
-fun resolveError(exception: Exception): ApiResponse.Error {
-    return when (exception) {
-        is HttpException -> resolveHttpException(exception)
-        is JsonSyntaxException -> onFailure(RequestException.parsingException(exception))
-        is UnknownHostException -> onFailure(RequestException.networkError(exception))
-        else -> onFailure(RequestException.unexpectedError(exception))
+fun resolveError(throwable: Throwable): ApiResponse.Error {
+    return when (throwable) {
+        is HttpException -> resolveHttpException(throwable)
+        is SerializationException -> onFailure(RequestException.parsingException(throwable))
+        is UnknownHostException -> onFailure(RequestException.networkError(throwable))
+        else -> onFailure(RequestException.unexpectedError(throwable))
     }
 }
 
@@ -21,18 +18,8 @@ private fun onFailure(requestException: RequestException): ApiResponse.Error {
 }
 
 private fun resolveHttpException(e: HttpException): ApiResponse.Error {
-    var errorResponse: JsonObject? = null
-
-    try {
-        errorResponse = Gson().fromJson(e.response()?.errorBody()?.string(), JsonObject::class.java)
-    } catch (js: Exception) {
-        //sentery
-        //FirebaseCrashlytics.getInstance().log("**body**${e.response().errorBody()?.string()}**error**${js.message}")
-    }
-
-    val errorJson = errorResponse?.getAsJsonArray("errors")?.get(0)?.asJsonObject
-    val bodyErrorCode = errorJson?.get("code")?.asString.orEmpty()
-    val bodyErrorMessage = errorJson?.get("message")?.asString ?: e.message().orEmpty()
+    val bodyErrorCode = e.code().toString()
+    val bodyErrorMessage = e.message()
 
     return when (e.code()) {
         401 -> {

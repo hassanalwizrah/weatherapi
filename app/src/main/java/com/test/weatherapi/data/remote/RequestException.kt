@@ -1,6 +1,6 @@
 package com.test.weatherapi.data.remote
 
-import com.google.gson.JsonSyntaxException
+import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import java.io.IOException
 import java.util.*
@@ -49,7 +49,7 @@ class RequestException(
             return RequestException(kind = Kind.TIMEOUT_ERROR, message = getErrorString(Kind.TIMEOUT_ERROR), exception = exception)
         }
 
-        fun parsingException(je: JsonSyntaxException): RequestException {
+        fun parsingException(je: SerializationException): RequestException {
             return RequestException(kind = Kind.JSON_PARSING, message = getErrorString(Kind.JSON_PARSING), exception = je)
         }
 
