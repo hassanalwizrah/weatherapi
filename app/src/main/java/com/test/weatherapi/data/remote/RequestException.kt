@@ -29,37 +29,29 @@ class RequestException(
 
     companion object {
 
-        internal fun authenticationError(bodyErrorCode: String, message: String, exception: HttpException): RequestException {
-            return RequestException(401, bodyErrorCode, Kind.AUTHENTICATION_ERROR, message, exception)
-        }
+        internal fun authenticationError(bodyErrorCode: String, message: String, exception: HttpException) =
+            RequestException(401, bodyErrorCode, Kind.AUTHENTICATION_ERROR, message, exception)
 
-        internal fun notFountError(exception: HttpException): RequestException {
-            return RequestException(404, "404", Kind.NOT_FOUND_ERROR, getErrorString(Kind.NOT_FOUND_ERROR), exception)
-        }
+        internal fun notFountError(exception: HttpException) =
+            RequestException(404, "404", Kind.NOT_FOUND_ERROR, getErrorString(Kind.NOT_FOUND_ERROR), exception)
 
-        internal fun serviceError(httpCode: Int, bodyCode: String, message: String, exception: HttpException): RequestException {
-            return RequestException(httpCode, bodyCode,  Kind.SERVICE_ERROR, message, exception)
-        }
+        internal fun serviceError(httpCode: Int, bodyCode: String, message: String, exception: HttpException) =
+            RequestException(httpCode, bodyCode,  Kind.SERVICE_ERROR, message, exception)
 
-        internal fun httpException(exception: HttpException): RequestException {
-            return RequestException(exception.code(), exception.code().toString(), Kind.UNEXPECTED,  getErrorString(Kind.UNEXPECTED), exception)
-        }
+        internal fun httpException(exception: HttpException) =
+            RequestException(exception.code(), exception.code().toString(), Kind.UNEXPECTED,  getErrorString(Kind.UNEXPECTED), exception)
 
-        internal fun timeoutError(exception: IOException): RequestException {
-            return RequestException(kind = Kind.TIMEOUT_ERROR, message = getErrorString(Kind.TIMEOUT_ERROR), exception = exception)
-        }
+        internal fun timeoutError(exception: IOException) =
+            RequestException(kind = Kind.TIMEOUT_ERROR, message = getErrorString(Kind.TIMEOUT_ERROR), exception = exception)
 
-        fun parsingException(je: SerializationException): RequestException {
-            return RequestException(kind = Kind.JSON_PARSING, message = getErrorString(Kind.JSON_PARSING), exception = je)
-        }
+        fun parsingException(je: SerializationException) =
+            RequestException(kind = Kind.JSON_PARSING, message = getErrorString(Kind.JSON_PARSING), exception = je)
 
-        internal fun networkError(exception: IOException): RequestException {
-            return RequestException(kind = Kind.NO_NETWORK_ERROR, message = getErrorString(Kind.NO_NETWORK_ERROR), exception = exception)
-        }
+        internal fun networkError(exception: IOException) =
+            RequestException(kind = Kind.NO_NETWORK_ERROR, message = getErrorString(Kind.NO_NETWORK_ERROR), exception = exception)
 
-        internal fun unexpectedError(exception: Throwable): RequestException {
-            return RequestException(kind = Kind.UNEXPECTED, message = getErrorString(Kind.UNEXPECTED), exception = exception)
-        }
+        internal fun unexpectedError(exception: Throwable) =
+            RequestException(kind = Kind.UNEXPECTED, message = getErrorString(Kind.UNEXPECTED), exception = exception)
 
         private fun getErrorString(kind: Kind): String {
             //TODO: customize errors message

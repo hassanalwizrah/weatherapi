@@ -15,6 +15,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+/*
+    private val viewModel by activityViewModels<MainViewModel>()
+    private val viewModel: MainViewModel by viewModels(
+        ownerProducer = { requireParentFragment() }
+    )
+ */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,16 +33,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.data.safeCollection(this) {
-            when(it) {
-                is ApiResponse.Error -> {
-                    binding.textview.text = it.errorMessage
-                    Timber.e("${it.errorCode}: ${it.errorMessage}")
+            when (it) {
+                is ApiResponse.Error -> it.requestException.apply {
+                    binding.textview.text = message
+                    Timber.e("$code/$bodyErrorCode: $message")
                 }
                 is ApiResponse.Progress -> {
                     binding.loading.isVisible = it.progress
+                    binding.textview.isVisible = !it.progress
                 }
-                is ApiResponse.Success -> {
-                    binding.textview.text = it.items?.current?.temp_c?.toString().orEmpty()
+                is ApiResponse.Success -> it.items?.apply {
+                    binding.textview.text = current?.temp_c?.toString().orEmpty()
                 }
             }
         }

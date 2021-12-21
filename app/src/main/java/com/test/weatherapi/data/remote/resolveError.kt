@@ -7,14 +7,10 @@ import java.net.UnknownHostException
 fun resolveError(throwable: Throwable): ApiResponse.Error {
     return when (throwable) {
         is HttpException -> resolveHttpException(throwable)
-        is SerializationException -> onFailure(RequestException.parsingException(throwable))
-        is UnknownHostException -> onFailure(RequestException.networkError(throwable))
-        else -> onFailure(RequestException.unexpectedError(throwable))
+        is SerializationException -> RequestException.parsingException(throwable).asFailure()
+        is UnknownHostException -> RequestException.networkError(throwable).asFailure()
+        else -> RequestException.unexpectedError(throwable).asFailure()
     }
-}
-
-private fun onFailure(requestException: RequestException): ApiResponse.Error {
-    return ApiResponse.Error(requestException.code, requestException.message)
 }
 
 private fun resolveHttpException(e: HttpException): ApiResponse.Error {
@@ -26,16 +22,12 @@ private fun resolveHttpException(e: HttpException): ApiResponse.Error {
 //            Application.setApplicationLevelObject(
 //                ApplicationLevelAction.ApplicationLevelActionObject(true, bodyErrorCode, bodyErrorMessage)
 //            )
-            onFailure(RequestException.authenticationError(bodyErrorCode, bodyErrorMessage, e))
+            RequestException.authenticationError(bodyErrorCode, bodyErrorMessage, e).asFailure()
         }
-
-        404 ->
-            onFailure(RequestException.notFountError(e))
-
-        400, 500, 501, 502, 503 ->
-            onFailure(RequestException.serviceError(e.code(), bodyErrorCode, bodyErrorMessage, e))
-
-        else ->
-            onFailure(RequestException.httpException(e))
+        404 -> RequestException.notFountError(e).asFailure()
+        400, 500, 501, 502, 503 -> RequestException.serviceError(e.code(), bodyErrorCode, bodyErrorMessage, e).asFailure()
+        else -> RequestException.httpException(e).asFailure()
     }
 }
+
+private fun RequestException.asFailure() = ApiResponse.Error(this)
